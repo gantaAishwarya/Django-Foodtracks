@@ -7,13 +7,15 @@ from django.utils import timezone
 
 #Telling django that this is a Model class
 class Store(models.Model):
+    # Using ID as Universal Unique Identifier
     id = models.UUIDField(primary_key=True, editable=False, default=uuid4)
     #company_id = 
-    name = models.CharField(max_length=200, help_text=_("Name of the bakery"))
+    name = models.CharField(max_length=200,null=False, help_text=_("Name of the bakery"))
     address = models.CharField(null=True, blank=True, max_length=500, help_text=_("Address of the bakery"))
     is_open = models.BooleanField(default=True, help_text=_("Whether the store is currently open"))
 
     class Meta:
+        #When quering order by descending order of alphabets
         ordering = ["-name"]
 
     def __str__(self):

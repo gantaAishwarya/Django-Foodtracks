@@ -9,11 +9,10 @@ COPY ./requirements/production.txt /code/
 
 RUN pip install --upgrade pip
 RUN pip install -r production.txt
+
 COPY . /code/
 
 RUN python manage.py collectstatic --noinput --settings=ft_demo.settings.production
 
 EXPOSE 8000
 STOPSIGNAL SIGINT
-
-RUN chmod -R +x deploy.sh

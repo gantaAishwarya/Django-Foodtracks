@@ -21,6 +21,7 @@ CSRF_COOKIE_SECURE = True
 # TODO: set this to 60 seconds first and then to 518400 once you prove the former works
 SECURE_HSTS_SECONDS = 60
 # https://docs.djangoproject.com/en/dev/ref/settings/#secure-hsts-include-subdomains
+#HTTP Strict Transport Security is set true
 SECURE_HSTS_INCLUDE_SUBDOMAINS = env.bool(
     "DJANGO_SECURE_HSTS_INCLUDE_SUBDOMAINS", default=True
 )
@@ -31,20 +32,9 @@ SECURE_CONTENT_TYPE_NOSNIFF = env.bool(
     "DJANGO_SECURE_CONTENT_TYPE_NOSNIFF", default=True
 )
 
+#efficiently  serving static files in production deployments removing the need for a separate web server (like Nginx or Apache) 
 MIDDLEWARE = ["whitenoise.middleware.WhiteNoiseMiddleware"] + MIDDLEWARE
 
-# CACHES
-CACHES = {
-    "default": {
-        "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": env("REDIS_URL", default="redis://127.0.0.1:6379/1"),
-        "OPTIONS": {
-            "CLIENT_CLASS": "django_redis.client.DefaultClient",
-            "IGNORE_EXCEPTIONS": True,
-        },
-        "KEY_PREFIX": "ft",
-    }
-}
 CACHE_TTL = 60 * 60 * 2
 
 ADMINS = [
@@ -95,7 +85,7 @@ if SENTRY_DSN:
     )
     sentry_sdk.init(
         dsn=SENTRY_DSN,
-        integrations=[sentry_logging, DjangoIntegration(), CeleryIntegration()],
+        integrations=[sentry_logging, DjangoIntegration()],
         traces_sample_rate=0.5,
         profiles_sample_rate=0.5
     )

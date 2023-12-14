@@ -7,7 +7,7 @@ from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 from .api_router import CustomDefaultRouter
 #from stores.views import StoreViewSet
-from stores.views import StoreHoursViewSet, store_list,store_detail,CustomAuthTokenLogin
+from stores.views import StoreHoursViewSet, store_list,store_detail, CustomAuthTokenLogin
 
 
 router = CustomDefaultRouter()
@@ -40,6 +40,7 @@ urlpatterns = [
     re_path(r'^redoc/$', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
 ]
 
+# URL pattern for serving static files collected during python manage.py collectstatic for efficient debugging
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

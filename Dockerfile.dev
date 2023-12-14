@@ -1,5 +1,6 @@
 FROM python:3.11-buster
 
+#output is immediately flushed and shown in the console 
 ENV PYTHONUNBUFFERED=1
 
 # create code directory

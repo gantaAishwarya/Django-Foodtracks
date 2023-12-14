@@ -8,7 +8,7 @@ from .models import Store, StoreHours
 from .serializers import StoreSerializer, StoreHoursSerializer
 from django.http import JsonResponse
 from .models import Store
-from .filters import StoreHoursFilter
+from .filters import StoreHoursFilter, StoreFilter
 from .serializers import StoreSerializer
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
@@ -17,8 +17,10 @@ from rest_framework.pagination import PageNumberPagination
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics
 
-class CustomAuthTokenLogin(ObtainAuthToken):
 
+class CustomAuthTokenLogin(ObtainAuthToken):
+    
+    #Method that returns token if given user and password are valid
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data,
                                            context={'request': request})
@@ -38,48 +40,62 @@ class CustomAuthTokenLogin(ObtainAuthToken):
 #     queryset = Store.objects.all()
 #     filterset_fields = ["name",]
 
-#@authentication_classes(TokenAuthentication)
-#@permission_classes([IsAuthenticated])
 @api_view(['GET','POST'])
 def store_list(request, format=None):
+    #In case request method is get
     if request.method == 'GET':
+        #Querying all the database rows 
         queryset = Store.objects.all()
+        filterset_class = StoreFilter 
+        filtered_queryset = filterset_class(request.GET, queryset=queryset).qs
         paginator = PageNumberPagination()
-        result_page = paginator.paginate_queryset(queryset, request)
+        #Updating the query set according to set paginator page value
+        result_page = paginator.paginate_queryset(filtered_queryset, request)  
+        #converting queryset to data dictionary using serializer
         serializer = StoreSerializer(result_page, many=True)
         return paginator.get_paginated_response(serializer.data)
     
     if request.method == 'POST':
         serializer = StoreSerializer(data=request.data)
         if serializer.is_valid():
+            #If serializer is true then save the value in database
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
+        #If serializer fails then return error bad request
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-#@authentication_classes(TokenAuthentication)
-#@permission_classes([IsAuthenticated])
 @api_view(['GET','PUT','DELETE'])
 def store_detail(request, id, format=None):
 
     try:
+        #Retrieving the store by id value
         store = Store.objects.get(pk=id)
     except Store.DoesNotExist:
+        #If id value doesn't exist then return not found
         return Response(status=status.HTTP_404_NOT_FOUND)
     
     if request.method == 'GET':
+        #converting query object to data dictionary
         serializer = StoreSerializer(store)
+        #showing the retrieved row in response
         return Response(serializer.data,status=status.HTTP_200_OK)
  
     elif request.method == 'PUT':
+        #convert the queryset to data dictionary using serializer
         serializer = StoreSerializer(store, data=request.data)
         if serializer.is_valid():
+            #If serializer is valid , save the data in database
             serializer.save()
-            return Response(serializer.data)
+            #sending updated data as response
+            return Response(serializer.data,status=status.HTTP_200_OK)
         else:
+            #If serializer is in valid then send bad request as status along with error
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
     elif request.method == 'DELETE':
+        #Deleting the retrieved store
         store.delete()
+        #sending error code 204 no content as response status
         return Response(status=status.HTTP_204_NO_CONTENT)
          
 
